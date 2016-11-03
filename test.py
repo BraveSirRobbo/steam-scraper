@@ -52,5 +52,23 @@ class ScraperTests(unittest.TestCase):
       self.assertKeyValue(res, "steam_cloud", "True") #Cross-Platform Multiplayer from class "game_area_details_specs"
       self.assertKeyValue(res, "controller_supported", "False") #Full OR Partial Controller Support from class "game_area_details_specs"
 
+# TODO: Real implementation
+def filterGames(ls,q):
+  return [ls[0]]
+
+# TODO: This is just a silly example
+class FilterTests(unittest.TestCase):
+  def test_basic_filter(self):
+
+    examples = [ {"title" : "blah", "overall_rating" : "Very Positive"}
+               , {"title" : "bad", "overall_rating" : "Very Negative"} ]
+
+    # TODO: Will - Do you have ideas about the form of the query input to the filter
+    q = "overall_rating > Ok"
+
+    self.assertEqual(filterGames(examples, q),
+                      [ {"title" : "blah", "overall_rating" : "Very Positive"} ])
+
+
 if __name__ =="__main__":
 	unittest.main()
