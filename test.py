@@ -1,7 +1,18 @@
 import unittest
+from bs4 import BeautifulSoup
 
-def scrapePage(html):
-	return {}
+def scrapePage(html_doc):
+	soup = BeautifulSoup(html_doc, 'html.parser')
+
+	titles = soup.find_all("div",class_="apphub_AppName")
+	assert(len(titles) == 1)
+	title = titles[0].get_text()
+
+
+	return {"title": title, 
+		"overall_rating" : "",
+		"num_reviews" : ""
+		}
 
 class ScraperTests(unittest.TestCase):
     def test_example_page(self):
