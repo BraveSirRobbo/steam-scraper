@@ -52,6 +52,25 @@ class ScraperTests(unittest.TestCase):
       self.assertKeyValue(res, "steam_cloud", "True") #Cross-Platform Multiplayer from class "game_area_details_specs"
       self.assertKeyValue(res, "controller_supported", "False") #Full OR Partial Controller Support from class "game_area_details_specs"
 
+    def test_no_reviews(self):
+      
+      with open("examples/No Reviews.html") as f:
+        page_text = "".join(f.readlines())
+
+      res = scrapePage(page_text)
+
+      self.asssertKeyValue(res,"overall_rating", "None")
+
+    def test_no_recent_reviews(self):
+
+      with open("examples/No recent reviews.html") as f:
+        page_text = "".join(f.readlines())
+
+      res = scrapePage(page_text)
+
+      self.assertKeyValue(res,"overall_rating", "Very Positive")
+
+
 # TODO: Real implementation
 def filterGames(ls,q):
   return [ls[0]]
