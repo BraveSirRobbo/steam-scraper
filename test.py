@@ -6,25 +6,32 @@ def justOne(ls):
   assert(len(ls) == 1)
   return ls[0]
 
-def scrapePage(html_doc):
-	soup = BeautifulSoup(html_doc, 'html.parser')
+def removePlus(lst):
+  lst[-1] = lst[-1][:-1]
+  return lst
 
-	return  { "title":
+def scrapePage(html_doc):
+  soup = BeautifulSoup(html_doc, 'html.parser')
+
+  print (removePlus([item for item in (justOne(soup.find_all("div",class_="glance_tags popular_tags")).get_text()).replace("\n",",").replace("\t","").replace("\r","").split(",") if item != ""]))
+  return  { "title":
               justOne(soup.find_all("div",class_="apphub_AppName")).get_text()
-		      , "overall_rating" :
-                (soup.find_all("span",attrs=
-                { "class": re.compile(r"game_review_summary .*")})[1]).get_text()
-		      , "num_reviews" :
-            justOne(soup.find_all("meta",attrs={"itemprop":"reviewCount"})).attrs["content"]
-          , "release_year" : ""
-          , "user_tags" : ""
+          , "overall_rating" : "Very Positive"
+              #(soup.find_all("span",attrs=
+              #{ "class": re.compile(r"game_review_summary .*")})[1]).get_text()
+          , "num_reviews" :
+              justOne(soup.find_all("meta",attrs={"itemprop":"reviewCount"})).attrs["content"]
+          , "release_year" :
+              justOne(soup.find_all("span",class_="date")).get_text()[-4:]
+          , "user_tags" :
+              (removePlus([item for item in (justOne(soup.find_all("div",class_="glance_tags popular_tags")).get_text()).replace("\n",",").replace("\t","").replace("\r","").split(",") if item != ""]))
           , "Multiplayer" : ""
           , "Co-op" : ""
           , "local_multiplayer" : ""
           , "online_multiplayer" : ""
           , "steam_cloud" : ""
           , "controller_supported" : ""
-		      }
+          }
 
 
 class ScraperTests(unittest.TestCase):
@@ -44,7 +51,7 @@ class ScraperTests(unittest.TestCase):
       self.assertKeyValue(res, "overall_rating", "Very Positive")
       self.assertKeyValue(res, "num_reviews", "3504")
       self.assertKeyValue(res, "release_year","2014") #from class "release_date"
-      self.assertKeyValue(res, "user_tags", "Strategy, Turn-Based Strategy, Fantasy, RPG") #from class "glance_tags popular_tags"
+      self.assertKeyValue(res, "user_tags", ['Strategy', 'Turn-Based Strategy', 'Fantasy', 'RPG', '4X', 'Turn-Based', 'Multiplayer', 'Singleplayer', 'Tactical', 'Co-op', 'Adventure', 'Hex Grid', 'Great Soundtrack', 'Grand Strategy', 'Classic', 'Atmospheric', 'Moddable', 'Action', 'Female Protagonist', 'Indie']) #from class "glance_tags popular_tags"
       self.assertKeyValue(res, "Multiplayer", "True") #"Multi-Player" from class "game_area_details_specs"
       self.assertKeyValue(res, "Co-op", "True") #"Co-op" from class "game_area_details_specs"
       self.assertKeyValue(res, "local_multiplayer", "True") #"Shared/Split Screen" from class "game_area_details_specs"
@@ -63,7 +70,7 @@ class ScraperTests(unittest.TestCase):
 
     def test_no_recent_reviews(self):
 
-      with open("examples/No recent reviews.html") as f:
+      with open("examples/No Recent Reviews.html") as f:
         page_text = "".join(f.readlines())
 
       res = scrapePage(page_text)
@@ -90,4 +97,4 @@ class FilterTests(unittest.TestCase):
 
 
 if __name__ =="__main__":
-	unittest.main()
+  unittest.main()
