@@ -13,9 +13,6 @@ def removePlus(lst):
 def scrapePage(html_doc):
   soup = BeautifulSoup(html_doc, 'html.parser')
 
-  #print (removePlus([item for item in (justOne(soup.find_all("div",class_="glance_tags popular_tags")).get_text()).replace("\n",",").replace("\t","").replace("\r","").split(",") if item != ""]))
-
-
   aList = []
   for tags in soup.find_all("div",class_="game_area_details_specs"):
     aList.append(tags.get_text())
