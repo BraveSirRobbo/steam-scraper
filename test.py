@@ -88,6 +88,7 @@ class ScraperTests(unittest.TestCase):
       res = scrapePage(page_text)
 
       self.assertKeyValue(res,"overall_rating", None)
+      self.assertKeyValue(res,"num_reviews", None)
 
 
 
