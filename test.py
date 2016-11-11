@@ -6,17 +6,14 @@ def justOne(ls):
   assert(len(ls) == 1)
   return ls[0]
 
-def removePlus(lst):
-  lst[-1] = lst[-1][:-1]
-  return lst
-
 def scrapePage(html_doc):
   soup = BeautifulSoup(html_doc, 'html.parser')
 
-  aList = []
-  for tags in soup.find_all("div",class_="game_area_details_specs"):
-    aList.append(tags.get_text())
+  ratings = [s.get_text() for s in soup.find_all("span",attrs={ "class": re.compile(r"game_review_summary .*")})]
+  assert(len(ratings) != 1)
+  reviewCounts = [x.attrs["content"] for x in soup.find_all("meta",attrs={"itemprop":"reviewCount"})]
 
+  aList = [t.get_text() for t in soup.find_all("div",class_="game_area_details_specs")]
 
   def tagChecker(*things):
     for thing in things:
@@ -26,15 +23,14 @@ def scrapePage(html_doc):
 
   return  { "title":
               justOne(soup.find_all("div",class_="apphub_AppName")).get_text()
-          , "overall_rating" : "Very Positive"
-              #(soup.find_all("span",attrs=
-              #{ "class": re.compile(r"game_review_summary .*")})[1]).get_text()
+          , "overall_rating" :
+              ratings[1] if len(ratings) > 0 else None
           , "num_reviews" :
-              justOne(soup.find_all("meta",attrs={"itemprop":"reviewCount"})).attrs["content"]
+              reviewCounts[0] if len(reviewCounts) > 0 else None
           , "release_year" :
               justOne(soup.find_all("span",class_="date")).get_text()[-4:]
           , "user_tags" :
-              (removePlus([item for item in (justOne(soup.find_all("div",class_="glance_tags popular_tags")).get_text()).replace("\n",",").replace("\t","").replace("\r","").split(",") if item != ""]))
+              [x.get_text().strip() for x in justOne(soup.find_all("div",class_="glance_tags popular_tags")).find_all("a")]
           , "multiplayer" :
               tagChecker("Multi-player")
           , "co-op" :
@@ -49,6 +45,7 @@ def scrapePage(html_doc):
 
 
 class ScraperTests(unittest.TestCase):
+
     def assertKeyValue(self, d, key, value):
       self.assertIn(key, d)
       self.assertEqual(d[key], value)
@@ -72,14 +69,6 @@ class ScraperTests(unittest.TestCase):
       self.assertKeyValue(res, "steam_cloud", True) #Cross-Platform Multiplayer from class "game_area_details_specs"
       self.assertKeyValue(res, "controller_supported", False) #Full OR Partial Controller Support from class "game_area_details_specs"
 
-    def test_no_reviews(self):
-      
-      with open("examples/No Reviews.html") as f:
-        page_text = "".join(f.readlines())
-
-      res = scrapePage(page_text)
-
-      self.asssertKeyValue(res,"overall_rating", "None")
 
     def test_no_recent_reviews(self):
 
@@ -89,6 +78,18 @@ class ScraperTests(unittest.TestCase):
       res = scrapePage(page_text)
 
       self.assertKeyValue(res,"overall_rating", "Very Positive")
+
+
+    def test_no_reviews(self):
+
+      with open("examples/No Reviews.html") as f:
+        page_text = "".join(f.readlines())
+
+      res = scrapePage(page_text)
+
+      self.assertKeyValue(res,"overall_rating", None)
+
+
 
 
 # TODO: Real implementation
